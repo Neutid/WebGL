@@ -1,0 +1,512 @@
+let texturedf = new THREE.TextureLoader().load("texture/crate.gif");
+    texturedf.wrapS = texturedf.wrapT = THREE.RepeatWrapping;
+    texturedf.offset.set(0,0);
+    texturedf.repeat.set(10,5);
+    let texturefenetre = new THREE.TextureLoader().load("texture/fenetre.png");
+    let texturetoit = new THREE.TextureLoader().load("texture/toit.png");
+    texturetoit.wrapS = texturetoit.wrapT = THREE.RepeatWrapping;
+    texturetoit.offset.set(0,0);
+    texturetoit.repeat.set(1,1);
+    let texturetoitspec = new THREE.TextureLoader().load("texture/toit.png");
+    texturetoitspec.wrapS = texturetoitspec.wrapT = THREE.RepeatWrapping;
+    texturetoitspec.offset.set(0,0);
+    texturetoitspec.repeat.set(.01,.01);
+    let texturetour = new THREE.TextureLoader().load("texture/stonewall.jpg");
+    texturetour.wrapS = texturetour.wrapT = THREE.RepeatWrapping;
+    texturetour.offset.set(0,0);
+    texturetour.repeat.set(15,6);
+    let texturetoursmall = new THREE.TextureLoader().load("texture/stonewall.jpg");
+    texturetoursmall.wrapS = texturetoursmall.wrapT = THREE.RepeatWrapping;
+    texturetoursmall.offset.set(0,0);
+    texturetoursmall.repeat.set(15,3);
+    let texturemur = new THREE.TextureLoader().load("texture/stonewall.jpg");
+    texturemur.wrapS = texturemur.wrapT = THREE.RepeatWrapping;
+    texturemur.offset.set(0,0);
+    texturemur.repeat.set(10,6);
+    let texturemursmall = new THREE.TextureLoader().load("texture/stonewall.jpg");
+    texturemursmall.wrapS = texturemursmall.wrapT = THREE.RepeatWrapping;
+    texturemursmall.offset.set(0,0);
+    texturemursmall.repeat.set(30,3);
+    let textureunderroof = new THREE.TextureLoader().load("texture/stonewall.jpg");
+    textureunderroof.wrapS = textureunderroof.wrapT = THREE.RepeatWrapping;
+    textureunderroof.offset.set(0,0);
+    textureunderroof.repeat.set(10,1);
+
+    //=================================
+    //Geometry + Material
+    //=================================
+    //sol
+    let geometryground = new THREE.BoxBufferGeometry(2000,10,2000);
+    let materialground = new THREE.MeshStandardMaterial({map: texturedf});
+    //=================================
+    //Batiment
+    let materialbat = new THREE.MeshStandardMaterial({map: texturemur});
+    let materialbatsmall = new THREE.MeshStandardMaterial({map: texturemursmall});
+    //Batiment extérieur
+    let geometrybatcour_s = new THREE.BoxBufferGeometry(1200,150,100);
+    let geometrybatcour_ne = new THREE.BoxBufferGeometry(400,400,50);
+    let geometrybatcour_nw = new THREE.BoxBufferGeometry(400,400,50);
+    let geometrybatcour_ew = new THREE.BoxBufferGeometry(100,150,800);
+    //Batiment Central
+    let geometrymainbat = new THREE.BoxBufferGeometry(400,400,400);
+    //Batiment coté
+    let geometrybatc = new THREE.BoxBufferGeometry(100,250,350);
+    //=================================
+    //Tour
+    let materialtow = new THREE.MeshStandardMaterial({map: texturetour});
+    //Tour Exterieure
+    let geometrytows = new THREE.CylinderBufferGeometry(125,125,150,64);
+    let geometrytown = new THREE.CylinderBufferGeometry(125,125,400,64);
+    //Tour intérieure
+    let geometrytowi = new THREE.CylinderBufferGeometry(100,100,400,64);
+    //================================
+    //Toit
+    let materialroof = new THREE.MeshStandardMaterial({map: texturetoit});
+    let materialroofspec = new THREE.MeshStandardMaterial({map: texturetoitspec});
+    //Toit tour extérieur
+    let geometryrooftower = new THREE.ConeBufferGeometry(125,250,64);
+    //Toit tour intérieur
+    let geometryrooftoweri = new THREE.ConeBufferGeometry(75,200,64);
+    //Toit batiment intérieur
+    let geometryroofi = new THREE.Geometry();
+    //Toit batiment facade (nord)
+    let geometryroofface = new THREE.Geometry();
+    //Toit batiment coté
+    let geometryroofc = new THREE.Geometry();
+    //================================
+    //Dessus de toit
+    let materialrooftop = new THREE.MeshStandardMaterial({map: texturetoit,side: THREE.DoubleSide});
+    //Dessus Toit tour
+    let geometryrooftop = new THREE.CylinderBufferGeometry(25,25,100,64);
+    //Sphere dessus de toit
+    let materialsphere = new THREE.MeshStandardMaterial({map: texturetoit});
+    let geometrysphere = new THREE.SphereBufferGeometry(25,64,64);
+    //Sphere dessus de toit extreme facade
+    //================================
+    //Dessous de toit
+    let materialunderroof = new THREE.MeshStandardMaterial({map: textureunderroof});
+    //Dessous de toit tour intérieure
+    let geometrytunderroof = new THREE.CylinderBufferGeometry(75,75,25,64);
+    //================================
+    //Fenetre
+    let materialwindow = new THREE.MeshStandardMaterial({map: texturefenetre});
+    let geometrywindow = new THREE.BoxBufferGeometry(25,100,1);
+
+    //Toit intérieur
+    geometryroofi.vertices.push(
+        new THREE.Vector3(-65,-75,65),
+        new THREE.Vector3(65,-75,65),
+        new THREE.Vector3(-50,75,0),
+        new THREE.Vector3(50,75,0),
+        new THREE.Vector3(-65,-75,-65),
+        new THREE.Vector3(65,-75,-65)
+    )
+    geometryroofi.faces.push(
+        //Front
+        new THREE.Face3(0,3,2),
+        new THREE.Face3(0,1,3),
+        //Right
+        new THREE.Face3(1,5,3),
+        //Back
+        new THREE.Face3(5,2,3),
+        new THREE.Face3(5,4,2),
+        //Left
+        new THREE.Face3(4,0,2),
+        //Bottom
+        new THREE.Face3(4,1,0),
+        new THREE.Face3(4,5,1)
+    )
+    assignUVs(geometryroofi);
+    //Toit facade
+    geometryroofface.vertices.push(
+        new THREE.Vector3(-80,-25,25),
+        new THREE.Vector3(80,-25,25),
+        new THREE.Vector3(-60,25,0),
+        new THREE.Vector3(60,25,0),
+        new THREE.Vector3(-80,-25,-25),
+        new THREE.Vector3(80,-25,-25)
+    )
+    geometryroofface.faces.push(
+        //Front
+        new THREE.Face3(0,3,2),
+        new THREE.Face3(0,1,3),
+        //Right
+        new THREE.Face3(1,5,3),
+        //Back
+        new THREE.Face3(5,2,3),
+        new THREE.Face3(5,4,2),
+        //Left
+        new THREE.Face3(4,0,2),
+        //Bottom
+        new THREE.Face3(4,1,0),
+        new THREE.Face3(4,5,1)
+    )
+    assignUVs(geometryroofface);
+    //Toit coté
+    geometryroofc.vertices.push(
+        new THREE.Vector3(-50,-50,150),
+        new THREE.Vector3(50,-50,150),
+        new THREE.Vector3(0,50,150),
+        new THREE.Vector3(0,50,-150),
+        new THREE.Vector3(-50,-50,-150),
+        new THREE.Vector3(50,-50,-150)
+    );
+    geometryroofc.faces.push(
+        //Front
+        new THREE.Face3(0,1,2),
+        //Right
+        new THREE.Face3(1,3,2),
+        new THREE.Face3(1,5,3),
+        //Back
+        new THREE.Face3(5,4,3),
+        //Left
+        new THREE.Face3(4,0,2),
+        new THREE.Face3(4,2,3),
+        //Bottom
+        new THREE.Face3(0,1,5),
+        new THREE.Face3(0,5,4)
+    );
+    assignUVs(geometryroofc);
+    //========================================
+    //Mesh
+    //========================================
+    //Sol
+    let ground = new THREE.Mesh(geometryground,materialground);
+    ground.receiveShadow = true;
+    ground.castShadow = true;
+    //Tour extérieure
+    let tower_ne = new THREE.Mesh(geometrytown,materialtow);
+    tower_ne.castShadow = true;
+    tower_ne.receiveShadow = true;
+    let tower_nw = new THREE.Mesh(geometrytown,materialtow);
+    tower_nw.castShadow = true;
+    tower_nw.receiveShadow = true;
+    let tower_se = new THREE.Mesh(geometrytows,materialtow);
+    tower_se.castShadow = true;
+    tower_se.receiveShadow = true;
+    let tower_sw = new THREE.Mesh(geometrytows,materialtow);
+    tower_sw.castShadow = true;
+    tower_sw.receiveShadow = true;
+    //Tour intérieure
+    let tower_ine = new THREE.Mesh(geometrytowi,materialtow);
+    tower_ine.castShadow = tower_ine.receiveShadow = true;
+    let tower_inw = new THREE.Mesh(geometrytowi,materialtow);
+    tower_inw.castShadow = tower_inw.receiveShadow = true;
+    let tower_ise = new THREE.Mesh(geometrytowi,materialtow);
+    tower_ise.castShadow = tower_ise.receiveShadow = true;
+    let tower_isw = new THREE.Mesh(geometrytowi,materialtow);
+    tower_isw.castShadow = tower_isw.receiveShadow = true;
+    //Batiment cour éxtérieure
+    let batcours = new THREE.Mesh(geometrybatcour_s,materialbatsmall);
+    batcours.castShadow = batcours.receiveShadow = true;
+    let batcourne = new THREE.Mesh(geometrybatcour_ne,materialbat);
+    batcourne.castShadow = batcourne.receiveShadow = true;
+    let batcournw = new THREE.Mesh(geometrybatcour_nw,materialbat);
+    batcournw.castShadow = batcournw.receiveShadow = true;
+    let batcoure = new THREE.Mesh(geometrybatcour_ew,materialbatsmall);
+    batcoure.castShadow = batcoure.receiveShadow = true;
+    let batcourw = new THREE.Mesh(geometrybatcour_ew,materialbatsmall);
+    batcourw.castShadow = batcourw.receiveShadow = true;
+    //Batiment intérieur
+    let batprinc = new THREE.Mesh(geometrymainbat,materialbat);
+    //Toit tour extérieure
+    let rooftowere = new THREE.Mesh(geometryrooftower,materialroof);
+    let rooftowerw = new THREE.Mesh(geometryrooftower,materialroof);
+    //Toit tour intérieure
+    let rooftoweri_nw = new THREE.Mesh(geometryrooftoweri, materialroof);
+    let rooftoweri_ne = new THREE.Mesh(geometryrooftoweri, materialroof);
+    let rooftoweri_sw = new THREE.Mesh(geometryrooftoweri, materialroof);
+    let rooftoweri_se = new THREE.Mesh(geometryrooftoweri, materialroof);
+    //Dessous de toit tour intérieure
+    let tunder_roof_nw = new THREE.Mesh(geometrytunderroof, materialunderroof);
+    let tunder_roof_ne = new THREE.Mesh(geometrytunderroof, materialunderroof);
+    let tunder_roof_sw = new THREE.Mesh(geometrytunderroof, materialunderroof);
+    let tunder_roof_se = new THREE.Mesh(geometrytunderroof, materialunderroof);
+    //Toit batiement intérieur
+    let roof_nw = new THREE.Mesh(geometryroofi,materialroofspec);
+    let roof_ne = new THREE.Mesh(geometryroofi,materialroofspec);
+    let roof_sw = new THREE.Mesh(geometryroofi,materialroofspec);
+    let roof_se = new THREE.Mesh(geometryroofi,materialroofspec);
+    //Toit facade
+    let roof_facew = new THREE.Mesh(geometryroofface,materialroofspec);
+    let roof_facee = new THREE.Mesh(geometryroofface,materialroofspec);
+    //Toit Coté
+    let roof_cw = new THREE.Mesh(geometryroofc,materialroofspec);
+    let roof_ce = new THREE.Mesh(geometryroofc,materialroofspec);
+    //Batiment Cote
+    let bat_ce = new THREE.Mesh(geometrybatc,materialbat);
+    let bat_cw = new THREE.Mesh(geometrybatc,materialbat);
+    //Dessus de toit intérieur
+    let rooftop_inw = new THREE.Mesh(geometryrooftop,materialrooftop);
+    let rooftop_ine = new THREE.Mesh(geometryrooftop,materialrooftop);
+    let rooftop_isw = new THREE.Mesh(geometryrooftop,materialrooftop);
+    let rooftop_ise = new THREE.Mesh(geometryrooftop,materialrooftop);
+    //Dessus de toit facade
+    let rooftop_w = new THREE.Mesh(geometryrooftop,materialrooftop);
+    let rooftop_e = new THREE.Mesh(geometryrooftop,materialrooftop);
+    //Sphere dessu de toit intérieur
+    let s_rooftop_inw = new THREE.Mesh(geometrysphere,materialsphere);
+    let s_rooftop_ine = new THREE.Mesh(geometrysphere,materialsphere);
+    let s_rooftop_isw = new THREE.Mesh(geometrysphere,materialsphere);
+    let s_rooftop_ise = new THREE.Mesh(geometrysphere,materialsphere);
+    //Sphere dessus de toit facade
+    let s_rooftop_w = new THREE.Mesh(geometrysphere,materialsphere);
+    let s_rooftop_e = new THREE.Mesh(geometrysphere,materialsphere);
+
+    for(let i = 0; i < nwin; ++i){
+        windows.push(new THREE.Mesh(geometrywindow,materialwindow));
+    }
+
+    //Ajout a la scene
+    scene.add(batprinc);
+    scene.add(ground);
+    scene.add(batcours);
+    scene.add(batcourne);
+    scene.add(batcournw);
+    scene.add(batcoure);
+    scene.add(batcourw);
+    scene.add(tower_ne);
+    scene.add(tower_nw);
+    scene.add(tower_se);
+    scene.add(tower_sw);
+    scene.add(tower_ine);
+    scene.add(tower_inw);
+    scene.add(tower_ise);
+    scene.add(tower_isw);
+    scene.add(rooftowere);
+    scene.add(rooftowerw);
+    scene.add(rooftoweri_nw);
+    scene.add(rooftoweri_ne);
+    scene.add(rooftoweri_sw);
+    scene.add(rooftoweri_se);
+    scene.add(tunder_roof_nw);
+    scene.add(tunder_roof_ne);
+    scene.add(tunder_roof_sw);
+    scene.add(tunder_roof_se);
+    scene.add(roof_nw);
+    scene.add(roof_ne);
+    scene.add(roof_sw);
+    scene.add(roof_se);
+    scene.add(roof_facew);
+    scene.add(roof_facee);
+    scene.add(roof_cw);
+    scene.add(roof_ce);
+    scene.add(bat_ce);
+    scene.add(bat_cw);
+    scene.add(rooftop_inw);
+    scene.add(rooftop_ine);
+    scene.add(rooftop_isw);
+    scene.add(rooftop_ise);
+    scene.add(rooftop_w);
+    scene.add(rooftop_e);
+    scene.add(s_rooftop_inw);
+    scene.add(s_rooftop_ine);
+    scene.add(s_rooftop_isw);
+    scene.add(s_rooftop_ise);
+    scene.add(s_rooftop_w);
+    scene.add(s_rooftop_e);
+    for(let i = 0; i < nwin; ++i){
+        scene.add(windows[i]);
+    }
+
+    //========================================
+    //Positionnement
+    //========================================
+    //Batiment extérieur
+    batcourw.position.y += 75;
+    batcourw.position.x += -550;
+    batcourw.position.z += 1000;
+
+    batcoure.position.y += 75;
+    batcoure.position.x += 550;
+    batcoure.position.z += 1000;
+
+    batcours.position.y += 75;
+    batcours.position.z += 1350;
+
+    batcourne.position.x += 400;
+    batcourne.position.y += 200;
+    batcourne.position.z += 625;
+
+    batcournw.position.x += -400;
+    batcournw.position.y += 200;
+    batcournw.position.z += 625;
+    //========================================
+    //Batiment intérieur
+    batprinc.position.y += 200;
+    batprinc.position.z += 800;
+    //========================================
+    //Tours extérieure
+    tower_ne.position.x += 650;
+    tower_ne.position.z += 550;
+    tower_ne.position.y += 200;
+
+    tower_nw.position.x += -650;
+    tower_nw.position.z += 550;
+    tower_nw.position.y += 200;
+
+    tower_se.position.x += 600;
+    tower_se.position.z += 1400;
+    tower_se.position.y += 75;
+
+    tower_sw.position.x += -600;
+    tower_sw.position.z += 1400;
+    tower_sw.position.y += 75;
+    //========================================
+    //Tour intérieure
+    tower_ine.position.x += 225;
+    tower_ine.position.z += 600;
+    tower_ine.position.y += 200;
+
+    tower_inw.position.x += -225;
+    tower_inw.position.z += 600;
+    tower_inw.position.y += 200;
+
+    tower_ise.position.x += 225;
+    tower_ise.position.z += 1000;
+    tower_ise.position.y += 200;
+
+    tower_isw.position.x += -225;
+    tower_isw.position.z += 1000;
+    tower_isw.position.y += 200;
+    //========================================
+    //Toit tour exterieur
+    rooftowere.position.y += 525;
+    rooftowere.position.x += 650;
+    rooftowere.position.z += 550;
+
+    rooftowerw.position.y += 525;
+    rooftowerw.position.x += -650;
+    rooftowerw.position.z += 550;
+    //========================================
+    //Toit tour intérieure
+    rooftoweri_nw.position.y += 525;
+    rooftoweri_nw.position.z += 600;
+    rooftoweri_nw.position.x += 225;
+
+    rooftoweri_ne.position.y += 525;
+    rooftoweri_ne.position.z += 600;
+    rooftoweri_ne.position.x += -225;
+
+    rooftoweri_sw.position.y += 525;
+    rooftoweri_sw.position.x += 225;
+    rooftoweri_sw.position.z += 1000;
+
+    rooftoweri_se.position.y += 525;
+    rooftoweri_se.position.x += -225;
+    rooftoweri_se.position.z += 1000;
+    //========================================
+    //Dessous de toit intérieur
+    tunder_roof_nw.position.y += 412.5;
+    tunder_roof_nw.position.z += 600;
+    tunder_roof_nw.position.x += 225;
+
+    tunder_roof_ne.position.y += 412.5;
+    tunder_roof_ne.position.z += 600;
+    tunder_roof_ne.position.x += -225;
+
+    tunder_roof_sw.position.y += 412.5;
+    tunder_roof_sw.position.x += 225;
+    tunder_roof_sw.position.z += 1000;
+
+    tunder_roof_se.position.y += 412.5;
+    tunder_roof_se.position.x += -225;
+    tunder_roof_se.position.z += 1000;
+    //Toit tour intérieure
+    roof_nw.position.y += 475;
+    roof_nw.position.z += 675;
+    roof_nw.position.x += -85;
+    roof_nw.rotation.y += Math.PI/2;
+
+    roof_ne.position.y += 475;
+    roof_ne.position.z += 675;
+    roof_ne.position.x += 85;
+    roof_ne.rotation.y += Math.PI/2;
+
+    roof_sw.position.y += 475;
+    roof_sw.position.z += 925;
+    roof_sw.position.x += -85;
+
+    roof_se.position.y += 475;
+    roof_se.position.z += 925;
+    roof_se.position.x += 85;
+    //========================================
+    //Toit facade
+    roof_facee.position.y += 425;
+    roof_facee.position.x += 395;
+    roof_facee.position.z += 625;
+
+    roof_facew.position.y += 425;
+    roof_facew.position.x += -395;
+    roof_facew.position.z += 625;
+    //========================================
+    //Batiment coté
+    bat_ce.position.y += 275;
+    bat_ce.position.x += 550;
+    bat_ce.position.z += 800;
+
+    bat_cw.position.y += 275;
+    bat_cw.position.x += -550;
+    bat_cw.position.z += 800;
+    //========================================
+    //Toit batiment coté
+    roof_ce.position.y += 450;
+    roof_ce.position.x += 550;
+    roof_ce.position.z += 825;
+
+    roof_cw.position.y += 450;
+    roof_cw.position.x += -550;
+    roof_cw.position.z += 825;
+    //========================================
+    //Dessus de toit Interieur
+    rooftop_inw.position.y += 600;
+    rooftop_inw.position.x += -225;
+    rooftop_inw.position.z += 600;
+
+    rooftop_ine.position.y += 600;
+    rooftop_ine.position.x += 225;
+    rooftop_ine.position.z += 600;
+
+    rooftop_isw.position.y += 600;
+    rooftop_isw.position.x += -225;
+    rooftop_isw.position.z += 1000;
+
+    rooftop_ise.position.y += 600;
+    rooftop_ise.position.x += 225;
+    rooftop_ise.position.z += 1000;
+    //========================================
+    //Dessus de toit Extreme Facade
+    rooftop_w.position.y += 650;
+    rooftop_w.position.z += 550;
+    rooftop_w.position.x += -650;
+
+    rooftop_e.position.y += 650;
+    rooftop_e.position.z += 550;
+    rooftop_e.position.x += 650;
+    //========================================
+    //Sphere Dessus de toit Interieur
+    s_rooftop_inw.position.y += 650;
+    s_rooftop_inw.position.x += -225;
+    s_rooftop_inw.position.z += 600;
+
+    s_rooftop_ine.position.y += 650;
+    s_rooftop_ine.position.x += 225;
+    s_rooftop_ine.position.z += 600;
+
+    s_rooftop_isw.position.y += 650;
+    s_rooftop_isw.position.x += -225;
+    s_rooftop_isw.position.z += 1000;
+
+    s_rooftop_ise.position.y += 650;
+    s_rooftop_ise.position.x += 225;
+    s_rooftop_ise.position.z += 1000;
+    //========================================
+    //Sphere Dessus de toit Extreme Facade
+    s_rooftop_w.position.y += 700;
+    s_rooftop_w.position.z += 550;
+    s_rooftop_w.position.x += -650;
+
+    s_rooftop_e.position.y += 700;
+    s_rooftop_e.position.z += 550;
+    s_rooftop_e.position.x += 650;
+    //========================================                                                   
