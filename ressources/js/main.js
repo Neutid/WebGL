@@ -31,10 +31,14 @@
     let mixer;
     const clock = new THREE.Clock();
 
-
     //Stats FPS
     let stats, container
 
+    //Light
+    let camhelper;
+
+    //boulet
+    let anim = {start: false,t: .2, v: 200};
 
 //---------------------------------------------------
 //------------------- Functions ---------------------
@@ -55,26 +59,6 @@
 
         }
 
-
-      //---------- Lights ----------
-        function assignUVs(geometry) {
-            geometry.faceVertexUvs[0] = [];
-            geometry.faces.forEach(function(face) {
-                let components = ['x', 'y', 'z'].sort(function(a, b) {
-                    return Math.abs(face.normal[a]) > Math.abs(face.normal[b]);
-                });
-                let v1 = geometry.vertices[face.a];
-                let v2 = geometry.vertices[face.b];
-                let v3 = geometry.vertices[face.c];
-                geometry.faceVertexUvs[0].push([
-                    new THREE.Vector2(v1[components[0]], v1[components[1]]),
-                    new THREE.Vector2(v2[components[0]], v2[components[1]]),
-                    new THREE.Vector2(v3[components[0]], v3[components[1]])
-                ]);
-            });
-            geometry.uvsNeedUpdate = true;
-        }
-
       //----- SoundControls for GUI ------
       const SoundControls = function () {
         this.master = listener.getMasterVolume();
@@ -84,49 +68,51 @@
       //---------- Animations ----------
         function animate() {
 
-          requestAnimationFrame( animate );
+
           const delta = clock.getDelta();
           if ( mixer ) mixer.update( delta );
+          first_p_control();
           //----------Draw the Scene----------
+          requestAnimationFrame( animate );
           renderer.render( scene, camera );
           stats.update();
-          first_p_control();
+
         }
 
       //---------- Player ----------
         function first_p_control(){
 
-    	if(keyboard[87]){ // W
-    		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
-    		camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
-    	}
-    	if(keyboard[83]){ // S
-    		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
-    		camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
-    	}
-    	if(keyboard[65]){ // A
-    		// Redirect motion by 90 degrees
-    		camera.position.x += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
-    		camera.position.z += -Math.cos(camera.rotation.y + Math.PI/2) * player.speed;
-    	}
-    	if(keyboard[68]){ // D
-    		camera.position.x += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
-    		camera.position.z += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
-    	}
-    	// Keyboard turn inputs (rotation player)
-    	if(keyboard[37]){ // left arrow
-    		camera.rotation.y -= player.turnSpeed;
-    	}
-    	if(keyboard[39]){ // right arrow
-    		camera.rotation.y += player.turnSpeed;
-    	}
-      if(keyboard[38]){ // bottom arrow
-        camera.rotation.x -= player.turnSpeed;
-      }
-      if(keyboard[40]){ // top arrow
-        camera.rotation.x += player.turnSpeed;
-      }
-    }
+        	if(keyboard[87]){ // W
+        		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
+        		camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+        	}
+        	if(keyboard[83]){ // S
+        		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
+        		camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+        	}
+        	if(keyboard[65]){ // A
+        		// Redirect motion by 90 degrees
+        		camera.position.x += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
+        		camera.position.z += -Math.cos(camera.rotation.y + Math.PI/2) * player.speed;
+        	}
+        	if(keyboard[68]){ // D
+        		camera.position.x += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
+        		camera.position.z += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
+        	}
+        	// Keyboard turn inputs (rotation player)
+        	if(keyboard[37]){ // left arrow
+        		camera.rotation.y -= player.turnSpeed;
+        	}
+        	if(keyboard[39]){ // right arrow
+        		camera.rotation.y += player.turnSpeed;
+        	}
+          if(keyboard[38]){ // bottom arrow
+            camera.rotation.x -= player.turnSpeed;
+          }
+          if(keyboard[40]){ // top arrow
+            camera.rotation.x += player.turnSpeed;
+          }
+        }
         function keyDown(event){
             keyboard[event.keyCode] = true;
         }
@@ -163,12 +149,28 @@
     window.addEventListener( 'resize', onWindowResize, false );
 
     //---------- Light ----------
-      //const light = new THREE.AmbientLight();
-      const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
-      scene.add( light );
+		//Ambient
+		const amblight = new THREE.AmbientLight(0xffffff,.3);
+		scene.add(amblight);
+		//Spot
+		const light = new THREE.SpotLight(0xffffff,1);
+		light.position.set(1000,2000,-600);
+		light.angle = Math.PI/5;
+		scene.add(light);
+		light.shadowCameraVisible = true;
+		light.castShadow = true;
+		light.shadow.mapSize.width = 2048;
+		light.shadow.mapSize.height = 2048;
+		light.shadow.camera.far = 10000;
+		light.shadow.camera.near = 10;
+		light.shadow.focus = 1;
+		scene.add(light.shadow.camera);
+		camhelper = new THREE.CameraHelper(light.shadow.camera,10);
+		camhelper.visible = false;
+		scene.add(camhelper);
 
     //---------- Camera ----------
-      camera.position.set(0, player.height, -500);
+      camera.position.set(0, player.height, 0);
       camera.lookAt(new THREE.Vector3(0,player.height,0));
 
     //---------- Music----------
@@ -206,32 +208,24 @@
         soundAmbient.setVolume(soundControls.Ambient);
       });
       volumeFolder.open();
-
+      //GUI Animation
+      const animFolder = gui.addFolder("Animation");
+      animFolder.add(anim,'start').name("Lancer animation").listen();
+      animFolder.add(anim,'t').name("Intervalle de temp");
+      animFolder.add(anim,'v').name("Vitesse");
+      animFolder.open();
+      //GUI Light
+      const lightFolder = gui.addFolder("Lumière");
+      lightFolder.add(camhelper,'visible').name("Helper");
       gui.add(options, 'reset');
 
-
+      scene.background = new THREE.CubeTextureLoader().setPath('./ressources/texture/').load(["skybox.png"]);
 //---------------------------------------------------
 //----------------- Applications --------------------
 //---------------------------------------------------
 
-      // addObj();
-      /*var loader2 = new FBXLoader;
-      loader2.load('./ressources/models/Defeated.fbx', function(obj){
-          scene.add(obj);
-      });*/
-
       init();
       animate();
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -14,25 +14,74 @@ export {medieval as medieval};
 
 const scene = mains_const.scene;
 const loader = mains_const.loader;
+let anim = {start: false,t: .2, v: 200};
 let texture_x;
 let windows = [];
-let nwin = 25;
+let nwin = 265;
+let count = 0;
+let boulet;
+let canon;
+let skybox;
+//Variable animation
+let t = 0;
+//Constante animation
+const alpha = Math.PI/7,beta = Math.PI/2;
 
 
 //---------------------------------------------------
 //------------------- Functions ---------------------
 //---------------------------------------------------
+  //---------- Lights ----------
+  function assignUVs(geometry) {
+      geometry.faceVertexUvs[0] = [];
+      geometry.faces.forEach(function(face) {
+          let components = ['x', 'y', 'z'].sort(function(a, b) {
+              return Math.abs(face.normal[a]) > Math.abs(face.normal[b]);
+          });
+          let v1 = geometry.vertices[face.a];
+          let v2 = geometry.vertices[face.b];
+          let v3 = geometry.vertices[face.c];
+          geometry.faceVertexUvs[0].push([
+              new THREE.Vector2(v1[components[0]], v1[components[1]]),
+              new THREE.Vector2(v2[components[0]], v2[components[1]]),
+              new THREE.Vector2(v3[components[0]], v3[components[1]])
+          ]);
+      });
+      geometry.uvsNeedUpdate = true;
+  }
+
+  	function createPathStrings(filename) {
+  		const basePath = "./";
+  		const baseFilename = basePath + filename;
+  		const fileType = ".bmp";
+  		const sides = ["east", "north", "up", "down", "west", "south"];
+  		const pathStings = sides.map(side => {
+  			return baseFilename + "_" + side + fileType;
+  		});
+  		return pathStings;
+  	}
+
+  	function createMaterialArray(filename) {
+  		const skyboxImagepaths = createPathStrings(filename);
+  		const materialArray = skyboxImagepaths.map(image => {
+  			let texture = new THREE.TextureLoader().load(image);
+  			return new THREE.MeshPhongMaterial({ map: texture, side: THREE.BackSide }); // <---
+  		});
+  		return materialArray;
+  	}
 
   //----------Texture----------
 function f_texture(which_texture,Vert_repeat,Hori_repeat){
-    if(which_texture==="crate"){
-        texture_x = loader.load('./ressources/texture/crate.gif');
+    if(which_texture==="ground"){
+        texture_x = loader.load('./ressources/texture/ground.jpg');
     } else if(which_texture==="fenetre"){
         texture_x = loader.load('./ressources/texture/fenetre.png');
     } else if(which_texture==="toit"){
         texture_x = loader.load('./ressources/texture/toit.png');
     } else if(which_texture==="stonewall"){
         texture_x = loader.load('./ressources/texture/stonewall.jpg');
+    }else if(which_texture==="metal"){
+        texture_x = loader.load('./ressources/texture/metal.jpg');
     }
 
     texture_x.wrapS = THREE.RepeatWrapping;
@@ -42,7 +91,7 @@ function f_texture(which_texture,Vert_repeat,Hori_repeat){
     return new THREE.MeshStandardMaterial( {map: texture_x, side: THREE.DoubleSide});
 }
 
-//------- Shape cubic -----------
+  //------- Shape cubic -----------
 function cube(dim_x, dim_y, dim_z, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
  const geometry_cube = new THREE.Mesh(
      new THREE.BoxBufferGeometry(dim_x,dim_y,dim_z),
@@ -58,7 +107,7 @@ function cube(dim_x, dim_y, dim_z, texture, tex_horiz, tex_verti, pos_x, pos_y, 
  return geometry_cube;
 }
 
-//------- Shape cylindric -----------
+  //------- Shape cylindric -----------
 function cylindric(radiustop, radiusbottom, height, radialsegament, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
  const geometry_cylindric = new THREE.Mesh(
      new THREE.CylinderBufferGeometry(radiustop, radiusbottom, height, radialsegament),
@@ -74,7 +123,7 @@ function cylindric(radiustop, radiusbottom, height, radialsegament, texture, tex
  return geometry_cylindric;
 }
 
-//------- Shape cone -----------
+  //------- Shape cone -----------
 function cone(x, y, z, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
  const geometry_cone = new THREE.Mesh(
      new THREE.ConeBufferGeometry(x,y,z),
@@ -87,7 +136,7 @@ function cone(x, y, z, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
  return geometry_cone;
 }
 
-//------- Shape sphere -----------
+  //------- Shape sphere -----------
 function sphere(x, y, z, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
    const geometry_sphere = new THREE.Mesh(
        new THREE.SphereBufferGeometry(x,y,z),
@@ -100,7 +149,7 @@ function sphere(x, y, z, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
    return geometry_sphere;
 }
 
-//------- Shape roof (faces, vector) -----------
+  //------- Shape roof (faces, vector) -----------
 function roof(objet, pos_x, pos_y, pos_z, rot_y){
    const geometry_roof = new THREE.Mesh(
        objet,
@@ -112,7 +161,23 @@ function roof(objet, pos_x, pos_y, pos_z, rot_y){
   // assignUVs(geometry_roof);
    return geometry_roof;
 }
+ /*
+function animate(){
+  //Animation boulet quand demandé
+  if(anim.start){
+    boulet.position.set(Math.cos(beta) * anim.v * t + 400, (-1 / 2) * 9.81 * Math.pow(t, 2) + Math.sin(alpha) * anim.v * t + 45, Math.cos(alpha) * anim.v * t + 0);
+    t += anim.t;
+    if(boulet.position.y < 0){
+      boulet.position.set(400,45,0);
+      t = 0;
+      anim.start = false;
+    }
+  }
+  requestAnimationFrame(animate);
+  renderer.render(scene,camera);
+}
 
+*/
 
 //---------------------------------------------------
 //------------------- Main functions ----------------
@@ -120,7 +185,7 @@ function roof(objet, pos_x, pos_y, pos_z, rot_y){
 
 function medieval(){
 
-    const ground = cube(2000,10,2000,"crate", 10, 5);
+    const ground = cube(2000,1,2000,"ground", 30, 50, 0,0,0);
     const batcours = cube(1200,150,100,"stonewall", 30, 3, 0, 75, 1350);
     const batcourne = cube(400,400,50,"stonewall", 10, 6, 400, 200, 625);
     const batcournw = cube(400,400,50,"stonewall", 10, 6, -400, 200, 625);
@@ -188,8 +253,9 @@ function medieval(){
 
     const roof_nw = roof(geometryroofi, -85, 475, 675, Math.PI/2);
     const roof_ne = roof(geometryroofi, 85, 475, 675, Math.PI/2);
-    const roof_sw = roof(geometryroofi, -85, 475, 925, Math.PI/2);
-    const roof_se = roof(geometryroofi, 85, 475, 925, Math.PI/2);
+    const roof_sw = roof(geometryroofi, -85, 475, 925, 0);
+    const roof_se = roof(geometryroofi, 85, 475, 925, 0);
+    assignUVs(geometryroofi);
 
     //Toit facade (nord)
     let geometryroofface = new THREE.Geometry();
@@ -219,7 +285,7 @@ function medieval(){
 
     const roof_facee = roof(geometryroofface, 395, 425, 625);
     const roof_facew = roof(geometryroofface, -395, 425, 625);
-
+    assignUVs(geometryroofface);
 
     //Toit coté
     let geometryroofc = new THREE.Geometry();
@@ -249,6 +315,7 @@ function medieval(){
 
     const roof_ce = roof(geometryroofc, 550, 450, 825);
     const roof_cw = roof(geometryroofc, -550, 450, 825);
+    assignUVs(geometryroofc);
 
     //Fenetre
     let texturefenetre = new THREE.TextureLoader().load("ressources/texture/fenetre.png");
@@ -259,23 +326,103 @@ function medieval(){
             windows.push(new THREE.Mesh(geometrywindow,materialwindow));
             scene.add(windows[i]);
         }
-}
+
+    for(let i = 0; i < 3; ++i){
+    	for(let j = 0; j < 7; ++j){
+    		windows[j + i*7].position.y += 75 + i*110;
+    		windows[j + i*7].position.x += 90 - 30 * j;
+    		windows[j + i*7].position.z += 600;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[21 + j + i*7].position.y += 75 + i*110;
+    		windows[21 + j + i*7].position.x += 520 - 30 * j;
+    		windows[21 + j + i*7].position.z += 600;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[42 + j + i*7].position.y += 75 + i*110;
+    		windows[42 + j + i*7].position.x += -340 - 30 * j;
+    		windows[42 + j + i*7].position.z += 600;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[63 + j + i*7].position.y += 75 + i*110;
+    		windows[63 + j + i*7].position.x += 90 - 30 * j;
+    		windows[63 + j + i*7].position.z += 600;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[84 + j + i*7].position.y += 75 + i*110;
+    		windows[84 + j + i*7].position.x += 478 - 30 * j;
+    		windows[84 + j + i*7].position.z += 650;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[105 + j + i*7].position.y += 75 + i*110;
+    		windows[105 + j + i*7].position.x += -298 - 30 * j;
+    		windows[105 + j + i*7].position.z += 650;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[126 + j + i*7].rotation.y += Math.PI/2;
+    		windows[126 + j + i*7].position.y += 75 + i*110;
+    		windows[126 + j + i*7].position.x += -200;
+    		windows[126 + j + i*7].position.z += 710 + 30 * j;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[147 + j + i*7].rotation.y += Math.PI/2;
+    		windows[147 + j + i*7].position.y += 75 + i*110;
+    		windows[147 + j + i*7].position.x += 200;
+    		windows[147 + j + i*7].position.z += 710 + 30 * j;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[168 + j + i*7].rotation.y += Math.PI/2;
+    		windows[168 + j + i*7].position.y += 75 + i*110;
+    		windows[168 + j + i*7].position.x += -500;
+    		windows[168 + j + i*7].position.z += 710 + 30 * j;
+    	}
+    	for(let j = 0; j < 7; ++j){
+    		windows[189 + j + i*7].rotation.y += Math.PI/2;
+    		windows[189 + j + i*7].position.y += 75 + i*110;
+    		windows[189 + j + i*7].position.x += 500;
+    		windows[189 + j + i*7].position.z += 710 + 30 * j;
+    	}
+    	for(let j = 0; j < 9; ++j){
+    		windows[210 + j + i*9].rotation.y += Math.PI/2;
+    		windows[210 + j + i*9].position.y += 75 + i*125;
+    		windows[210 + j + i*9].position.x += -600;
+    		windows[210 + j + i*9].position.z += 710 + 30 * j;
+    	}
+    	for(let j = 0; j < 9; ++j){
+    		windows[238 + j + i*9].rotation.y += Math.PI/2;
+    		windows[238 + j + i*9].position.y += 75 + i*125;
+    		windows[238 + j + i*9].position.x += 600;
+    		windows[238 + j + i*9].position.z += 710 + 30 * j;
+    	}
+    }
+    for(let i = 0; i < nwin; ++i){
+			windows.push(new THREE.Mesh(geometrywindow,materialwindow));
+			windows[i].castShadow = true;
+			windows[i].receiveShadow = true;
+		}
+
+    //Canon
+		var materialboulet = new THREE.MeshPhongMaterial({map: 'metal'});
+		var geometryBoulet = new THREE.SphereBufferGeometry(25,32,32);
+		var geometryCanon = new THREE.CylinderBufferGeometry(30,30,100,32);
+    canon = new THREE.Mesh(geometryCanon,materialboulet);
+    canon.position.set(400,45,0);
+		canon.rotation.x = Math.PI/2.5;
+    scene.add(canon);
+
+    //Boulet du canon
+		boulet = new THREE.Mesh(geometryBoulet,materialboulet);
+		boulet.castShadow = true;
+		boulet.receiveShadow = true;
+    boulet.position.set(400,45,0);
+		scene.add(boulet);
 /*
-//---------- Lights ----------
-  function assignUVs(geometry) {
-      geometry.faceVertexUvs[0] = [];
-      geometry.faces.forEach(function(face) {
-          let components = ['x', 'y', 'z'].sort(function(a, b) {
-              return Math.abs(face.normal[a]) > Math.abs(face.normal[b]);
-          });
-          let v1 = geometry.vertices[face.a];
-          let v2 = geometry.vertices[face.b];
-          let v3 = geometry.vertices[face.c];
-          geometry.faceVertexUvs[0].push([
-              new THREE.Vector2(v1[components[0]], v1[components[1]]),
-              new THREE.Vector2(v2[components[0]], v2[components[1]]),
-              new THREE.Vector2(v3[components[0]], v3[components[1]])
-          ]);
-      });
-      geometry.uvsNeedUpdate = true;
-  } */
+		//Skybox
+		var geometryskybox = new THREE.BoxBufferGeometry(10000,10000,10000);
+		var materialskybox = createMaterialArray("clouds1");
+    skybox = new THREE.Mesh(geometryskybox,materialskybox);
+		skybox.castShadow = true;
+		skybox.receiveShadow = true;
+    scene.add(skybox);
+  */
+}
