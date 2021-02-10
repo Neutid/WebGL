@@ -3,6 +3,7 @@
 //---------------------------------------------------
 
 import * as THREE from '../../build/three.module.js';
+import { ColladaLoader} from '../../examples/jsm/loaders/ColladaLoader.js';
 import mains_const from "./globales_const.js"
 
 export {disney as disney};
@@ -122,7 +123,32 @@ function cone(x, y, z, texture, tex_horiz, tex_verti, pos_x, pos_y, pos_z){
 //------------------- Main functions ----------------
 //---------------------------------------------------
 
+
+
 function disney(){
+
+
+    var loader = new ColladaLoader();
+    loader.load('stormtrooper.dae', function ( collada ) {
+        const animations = collada.animations;
+        const avatar = collada.scene;
+
+        avatar.traverse(function ( mode ){
+            if (node.isMesh){
+                node.frustumCulled = false;
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        mixer = new THREE.AnimationMixer( avatar );
+        mixer.clipAction( animation[0]).play();
+        scene.add(avatar);
+        avatar.position.set(11,-1,24);
+        avatar.rotation.z = 3;
+        scene.add(avatar);
+    });
+
   //---------- create the first castel ----------
 
       //----------------gate right wall 1------------------

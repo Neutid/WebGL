@@ -77,6 +77,10 @@
           renderer.render( scene, camera );
           stats.update();
 
+          if (mixer !== undefined){
+              mixer.update( delta );
+          }
+
         }
 
       //---------- Player ----------
@@ -174,6 +178,7 @@
       camera.lookAt(new THREE.Vector3(0,player.height,0));
 
     //---------- Music----------
+
       // create an AudioListener and add it to the camera
       const listener = new THREE.AudioListener();
       camera.add(listener);
